@@ -1,4 +1,12 @@
-QCodeEdit
+Qt-Editor
 =========
 
-Source code of a simple code editor for the Qt framework using internal classes for syntax highlighting via regular expression, code completion, and margin handling.
+Originally a front-end IDE for the final project of *"Interpreter Design"*.
+
+Features:
+
++ syntax highlighter
++ auto completion
++ basic file I/O
++ one-button compile (implemented with Applescript, tested out on Sierra)
++ more to come...
