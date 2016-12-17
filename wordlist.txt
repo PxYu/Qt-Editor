@@ -1,0 +1,10 @@
+inline
+while
+void
+int
+float
+foreach
+for
+struct
+class
+double
