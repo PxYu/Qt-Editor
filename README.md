@@ -10,3 +10,7 @@ Features:
 + basic file I/O
 + one-button compile (implemented with Applescript, tested out on Sierra)
 + more to come...
+
+Thanks.
+
+J
