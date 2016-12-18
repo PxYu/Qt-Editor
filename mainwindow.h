@@ -29,6 +29,8 @@
 
 #include <QMainWindow>
 #include <QPushButton>
+#include <QWidget>
+#include <QTableWidget>
 
 class MainWindow : public QMainWindow
 {
@@ -41,16 +43,19 @@ public slots:
     void about();
     void newFile();
     void openFile(const QString &path = QString());
-    void handleButton();
+    void compileFile();
+    //void handleButton();
 
 private:
     void setupEditor();
     void setupFileMenu();
     void setupHelpMenu();
+    void setupTable();
 
     QCodeEdit *editor;
     QCodeCPP *highlighter;
-    QPushButton *m_button;
+    QTableWidget *errorTable;
+    //QPushButton *m_button;
 };
 
 #endif // MAINWINDOW_H

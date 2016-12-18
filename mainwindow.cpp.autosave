@@ -139,7 +139,6 @@ void MainWindow::setupHelpMenu()
 
 //void MainWindow::handleButton()
 //{
-//    //editor->setPlainText("TEST");
 ////    QString file_full, file_name, file_path;
 ////    QFileInfo fi;
 ////    file_full = QFileDialog::getOpenFileName(this);

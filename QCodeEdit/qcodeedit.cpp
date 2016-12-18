@@ -42,7 +42,7 @@ QCodeEdit::QCodeEdit(QWidget *parent) : QPlainTextEdit(parent)
     updateLineNumberAreaWidth(0);
     highlightCurrentLine();
 
-    codeCompleter = new QCompleter(wordlist, this);
+    codeCompleter = new QCompleter(this);
     codeCompleter->setModel(modelFromFile(":/wordlist.txt"));
     codeCompleter->setModelSorting(QCompleter::CaseInsensitivelySortedModel);
     codeCompleter->setCaseSensitivity(Qt::CaseInsensitive);
