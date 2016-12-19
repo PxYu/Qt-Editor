@@ -6,11 +6,13 @@ Originally a front-end IDE for the final project of *"Interpreter Design"*.
 Features:
 
 + syntax highlighter
-+ auto completion
++ auto completion(sort of...)
 + basic file I/O
-+ one-button compile (implemented with Applescript, tested out on Sierra)
++ terminal compile (tested out on Sierra | should be easy to alter on windows or linux platform)
++ bug report
++ bug location (double click on table item)
 + more to come...
 
-Thanks.
+
 
 pxyu
