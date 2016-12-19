@@ -44,7 +44,7 @@ public slots:
     void newFile();
     void openFile(const QString &path = QString());
     void compileFile();
-    //void handleButton();
+    void jumpToBug(QTableWidgetItem *);
 
 private:
     void setupEditor();
@@ -52,10 +52,23 @@ private:
     void setupHelpMenu();
     void setupTable();
 
+Q_SIGNALS:
+    void itemDoubleClicked(QTableWidgetItem *item);
+
+private:
     QCodeEdit *editor;
     QCodeCPP *highlighter;
     QTableWidget *errorTable;
-    //QPushButton *m_button;
+    QTableWidgetItem *newItem1;
+    QTableWidgetItem *newItem2;
+    QTableWidgetItem *newItem3;
+    QTableWidgetItem *newItem4;
+    QTableWidgetItem *newItem5;
+    QTableWidgetItem *newItem6;
+    QTableWidgetItem *newItem7;
+    QTableWidgetItem *newItem8;
+    QTableWidgetItem *newItem9;
+
 };
 
 #endif // MAINWINDOW_H

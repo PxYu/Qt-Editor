@@ -119,7 +119,7 @@ void QCodeEdit::focusInEvent(QFocusEvent *e)
 void QCodeEdit::keyPressEvent(QKeyEvent *e)
 {
     if (codeCompleter && codeCompleter->popup()->isVisible()) {
-        // The following keys are forwarded by the completer to the widget
+       // The following keys are forwarded by the completer to the widget
        switch (e->key()) {
        case Qt::Key_Enter:
        case Qt::Key_Return:
