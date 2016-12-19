@@ -10,7 +10,7 @@ Features:
 + basic file I/O
 + terminal compile (tested out on Sierra | should be easy to alter on windows or linux platform)
 + bug report
-+ bug location (double click on table item)
++ bug locating (double click on table item)
 + more to come...
 
 
