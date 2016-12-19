@@ -23,6 +23,7 @@
 
 #include <QtWidgets>
 #include <QTableWidget>
+#include <iostream>
 
 #include "mainwindow.h"
 
@@ -42,9 +43,10 @@ MainWindow::MainWindow(QWidget *parent)
     widget->setLayout(mainLayout);
     setCentralWidget(widget);
 
-    setWindowTitle(tr("QCodeEdit"));
+    setWindowTitle(tr("CMM Editor - "));
 
     connect(errorTable, SIGNAL(itemDoubleClicked(QTableWidgetItem *)), this, SLOT(jumpToBug(QTableWidgetItem *)));
+    connect(editor, SIGNAL(textChanged()), this, SLOT(changeState()));
 }
 
 void MainWindow::about()
@@ -60,36 +62,69 @@ void MainWindow::about()
 void MainWindow::newFile()
 {
     editor->clear();
+    currentFileName = "";
 }
 
 void MainWindow::openFile(const QString &path)
 {
     QString fileName = path;
 
-    if (fileName.isNull())
-        fileName = QFileDialog::getOpenFileName(this, tr("Open File"), "", "C++ Files (*.cpp *.h)");
+    if (fileName.isNull()) {
+        fileName = QFileDialog::getOpenFileName(this, tr("Open File"), "", "Cmm Files (*.cmm)");
+    }
 
     if (!fileName.isEmpty()) {
         QFile file(fileName);
-        if (file.open(QFile::ReadOnly | QFile::Text))
+        if (file.open(QFile::ReadOnly | QFile::Text)) {
             editor->setPlainText(file.readAll());
+        }
+        currentFileName = fileName;
+    }
+}
+
+void MainWindow::saveFile()
+{
+    if (currentFileName != "") {
+        QFile file(currentFileName);
+        file.open(QIODevice::WriteOnly);
+        QTextStream out(&file);
+        out << editor -> toPlainText();
+        file.close();
+        fileIsSaved = true;
+    } else {
+        QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
+                                QDir::currentPath(),
+                                tr("Cmm Files (*.cmm)"));
+        if (!fileName.isNull()) {
+            QFile file(fileName);
+            file.open(QIODevice::WriteOnly);
+            QTextStream out(&file);
+            out << editor->toPlainText();
+            file.close();
+            currentFileName = fileName;
+            fileIsSaved = true;
+        }
     }
 }
 
 void MainWindow::compileFile()
 {
-    QProcess p;
-    QString cmd = QString("osascript");
-    QStringList args;
-    QString TerminalCmd = "ls";
-    QString ascript = "tell application \"Terminal\"\n";
-    ascript += "  activate\n";
-    ascript += "  do script \"";
-    ascript += TerminalCmd;
-    ascript += "\"\n";
-    ascript += "end tell";
-    args << "-e" << ascript;
-    p.startDetached(cmd, args);
+    if (fileIsSaved == false) {
+        QMessageBox::warning(NULL, QString("Warning"), QString("Please save before compiling!"), QMessageBox::Ok);
+    } else {
+        QProcess p;
+        QString cmd = QString("osascript");
+        QStringList args;
+        QString TerminalCmd = "ls";
+        QString ascript = "tell application \"Terminal\"\n";
+        ascript += "  activate\n";
+        ascript += "  do script \"";
+        ascript += TerminalCmd;
+        ascript += "\"\n";
+        ascript += "end tell";
+        args << "-e" << ascript;
+        p.startDetached(cmd, args);
+    }
 }
 
 void MainWindow::jumpToBug(QTableWidgetItem *item){
@@ -102,7 +137,10 @@ void MainWindow::jumpToBug(QTableWidgetItem *item){
     qtc.movePosition(QTextCursor::NextCharacter, QTextCursor::MoveAnchor, bugCol-1);
     editor->setFocus();
     editor->setTextCursor(qtc);
+}
 
+void MainWindow::changeState() {
+    fileIsSaved = false;
 }
 
 void MainWindow::setupEditor()
@@ -129,35 +167,25 @@ void MainWindow::setupTable()
     QHeaderView* header = errorTable->horizontalHeader();
     header->setStretchLastSection(true);
 
-    newItem1 = new QTableWidgetItem(tr("1"));
-    newItem2 = new QTableWidgetItem(tr("2"));
-    newItem3 = new QTableWidgetItem(tr("Error1"));
-    errorTable->setItem(0, 0, newItem1);
-    errorTable->setItem(0, 1, newItem2);
-    errorTable->setItem(0, 2, newItem3);
-    newItem1->setFlags(newItem1->flags() ^ Qt::ItemIsEditable);
-    newItem2->setFlags(newItem2->flags() ^ Qt::ItemIsEditable);
-    newItem3->setFlags(newItem3->flags() ^ Qt::ItemIsEditable);
+    ///* test case
+    errorTable->setItem(0, 0, new QTableWidgetItem(tr("1")));
+    errorTable->setItem(0, 1, new QTableWidgetItem(tr("2")));
+    errorTable->setItem(0, 2, new QTableWidgetItem(tr("e1")));
+    errorTable->setItem(1, 0, new QTableWidgetItem(tr("2")));
+    errorTable->setItem(1, 1, new QTableWidgetItem(tr("4")));
+    errorTable->setItem(1, 2, new QTableWidgetItem(tr("e2")));
+    errorTable->setItem(2, 0, new QTableWidgetItem(tr("5")));
+    errorTable->setItem(2, 1, new QTableWidgetItem(tr("2")));
+    errorTable->setItem(2, 2, new QTableWidgetItem(tr("e3")));
 
-    newItem4 = new QTableWidgetItem(tr("2"));
-    newItem5 = new QTableWidgetItem(tr("100"));
-    newItem6 = new QTableWidgetItem(tr("Error2"));
-    errorTable->setItem(1, 0, newItem4);
-    errorTable->setItem(1, 1, newItem5);
-    errorTable->setItem(1, 2, newItem6);
-    newItem4->setFlags(newItem4->flags() ^ Qt::ItemIsEditable);
-    newItem5->setFlags(newItem5->flags() ^ Qt::ItemIsEditable);
-    newItem6->setFlags(newItem6->flags() ^ Qt::ItemIsEditable);
-
-    newItem7 = new QTableWidgetItem(tr("6"));
-    newItem8 = new QTableWidgetItem(tr("8"));
-    newItem9 = new QTableWidgetItem(tr("Error3"));
-    errorTable->setItem(2, 0, newItem7);
-    errorTable->setItem(2, 1, newItem8);
-    errorTable->setItem(2, 2, newItem9);
-    newItem7->setFlags(newItem7->flags() ^ Qt::ItemIsEditable);
-    newItem8->setFlags(newItem8->flags() ^ Qt::ItemIsEditable);
-    newItem9->setFlags(newItem9->flags() ^ Qt::ItemIsEditable);
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 2; j++) {
+            errorTable->item(i,j)->setFlags(errorTable->item(i,j)->flags() ^ Qt::ItemIsEditable);
+            errorTable->item(i,j)->setBackground(QColor::fromRgb(238,99,99));
+        }
+        errorTable->item(i,2)->setFlags(errorTable->item(i,2)->flags() ^ Qt::ItemIsEditable);
+    }
+     //*/
 }
 
 void MainWindow::setupFileMenu()
@@ -167,6 +195,7 @@ void MainWindow::setupFileMenu()
 
     fileMenu->addAction(tr("&New"), this, SLOT(newFile()), QKeySequence::New);
     fileMenu->addAction(tr("&Open..."), this, SLOT(openFile()), QKeySequence::Open);
+    fileMenu->addAction(tr("&Save"), this, SLOT(saveFile()), QKeySequence::Save);
     fileMenu->addAction(tr("E&xit"), qApp, SLOT(quit()), QKeySequence::Quit);
     fileMenu->addAction(tr("Compile"), this, SLOT(compileFile()), QKeySequence(Qt::CTRL + Qt::Key_R));
 }
@@ -180,14 +209,6 @@ void MainWindow::setupHelpMenu()
 
 //void MainWindow::handleButton()
 //{
-////    QString file_full, file_name, file_path;
-////    QFileInfo fi;
-////    file_full = QFileDialog::getOpenFileName(this);
-////    fi = QFileInfo(file_full);
-////    file_name = fi.fileName();
-////    file_path = fi.absolutePath();
-////    editor->setPlainText(file_path+"\\"+file_name);
-
 //    QProcess p;
 //    QString cmd = QString("osascript");
 //    QStringList args;

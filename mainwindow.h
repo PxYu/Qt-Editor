@@ -43,8 +43,10 @@ public slots:
     void about();
     void newFile();
     void openFile(const QString &path = QString());
+    void saveFile();
     void compileFile();
     void jumpToBug(QTableWidgetItem *);
+    void changeState();
 
 private:
     void setupEditor();
@@ -54,21 +56,17 @@ private:
 
 Q_SIGNALS:
     void itemDoubleClicked(QTableWidgetItem *item);
+    void textChanged();
 
 private:
     QCodeEdit *editor;
     QCodeCPP *highlighter;
     QTableWidget *errorTable;
-    QTableWidgetItem *newItem1;
-    QTableWidgetItem *newItem2;
-    QTableWidgetItem *newItem3;
-    QTableWidgetItem *newItem4;
-    QTableWidgetItem *newItem5;
-    QTableWidgetItem *newItem6;
-    QTableWidgetItem *newItem7;
-    QTableWidgetItem *newItem8;
-    QTableWidgetItem *newItem9;
+    QString currentFileName = "";
+    QString mainWindowTitle;
+    bool fileIsSaved = false;
 
 };
+
 
 #endif // MAINWINDOW_H
