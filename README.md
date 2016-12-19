@@ -11,7 +11,7 @@ Features:
 + terminal compile (tested out on Sierra | should be easy to alter on windows or linux platform)
 + bug report
 + bug locating (double click on table item)
-+ more to come...
++ more to come... or not
 
 
 
