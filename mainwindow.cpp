@@ -31,6 +31,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     setupFileMenu();
     setupHelpMenu();
+    setupSettingMenu();
     setupEditor();
     setupTable();
 
@@ -43,6 +44,9 @@ MainWindow::MainWindow(QWidget *parent)
     setCentralWidget(widget);
 
     setWindowTitle(tr("CMM Editor - "));
+
+//    QString appPath = qApp->applicationDirPath();
+//    editor->setPlainText(appPath);
 
     connect(errorTable, SIGNAL(itemDoubleClicked(QTableWidgetItem *)), this, SLOT(jumpToBug(QTableWidgetItem *)));
     connect(editor, SIGNAL(textChanged()), this, SLOT(changeState()));
@@ -60,8 +64,13 @@ void MainWindow::about()
 
 void MainWindow::newFile()
 {
-    editor->clear();
-    currentFileName = "";
+    if (!fileIsSaved) {
+        QMessageBox::warning(NULL, QString("Warning"), QString("Please save current file before opening another file!"), QMessageBox::Ok);
+    } else {
+        editor->clear();
+        currentFileName = "";
+        fileIsSaved = false;
+    }
 }
 
 void MainWindow::openFile(const QString &path)
@@ -115,7 +124,9 @@ void MainWindow::compileFile()
         QProcess p;
         QString cmd = QString("osascript");
         QStringList args;
-        QString TerminalCmd = "ls /";
+        //QString TerminalCmd = "ls";
+        QString TerminalCmd = "~/Downloads/cmm/cmmbuild/cmm ";
+        TerminalCmd += currentFileName + " " + arguments;
         QString ascript = "tell application \"Terminal\"\n";
         ascript += "  activate\n";
         ascript += "  do script \"";
@@ -162,30 +173,28 @@ void MainWindow::setupEditor()
 
 void MainWindow::setupTable()
 {
-    errorTable = new QTableWidget(3, 3);
+    errorTable = new QTableWidget(0, 3);
     errorTable->setHorizontalHeaderLabels(QStringList()<<"Row"<<"Column"<<"Information");
     QHeaderView* header = errorTable->horizontalHeader();
     header->setStretchLastSection(true);
 
-    ///* test case
-    errorTable->setItem(0, 0, new QTableWidgetItem(tr("1")));
-    errorTable->setItem(0, 1, new QTableWidgetItem(tr("2")));
-    errorTable->setItem(0, 2, new QTableWidgetItem(tr("e1")));
-    errorTable->setItem(1, 0, new QTableWidgetItem(tr("2")));
-    errorTable->setItem(1, 1, new QTableWidgetItem(tr("4")));
-    errorTable->setItem(1, 2, new QTableWidgetItem(tr("e2")));
-    errorTable->setItem(2, 0, new QTableWidgetItem(tr("5")));
-    errorTable->setItem(2, 1, new QTableWidgetItem(tr("2")));
-    errorTable->setItem(2, 2, new QTableWidgetItem(tr("e3")));
+//    errorTable->setItem(0, 0, new QTableWidgetItem(tr("1")));
+//    errorTable->setItem(0, 1, new QTableWidgetItem(tr("2")));
+//    errorTable->setItem(0, 2, new QTableWidgetItem(tr("e1")));
+//    errorTable->setItem(1, 0, new QTableWidgetItem(tr("2")));
+//    errorTable->setItem(1, 1, new QTableWidgetItem(tr("4")));
+//    errorTable->setItem(1, 2, new QTableWidgetItem(tr("e2")));
+//    errorTable->setItem(2, 0, new QTableWidgetItem(tr("5")));
+//    errorTable->setItem(2, 1, new QTableWidgetItem(tr("2")));
+//    errorTable->setItem(2, 2, new QTableWidgetItem(tr("e3")));
 
-    for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 2; j++) {
-            errorTable->item(i,j)->setFlags(errorTable->item(i,j)->flags() ^ Qt::ItemIsEditable);
-            errorTable->item(i,j)->setBackground(QColor::fromRgb(238,99,99));
-        }
-        errorTable->item(i,2)->setFlags(errorTable->item(i,2)->flags() ^ Qt::ItemIsEditable);
-    }
-     //*/
+//    for (int i = 0; i < 3; i++) {
+//        for (int j = 0; j < 2; j++) {
+//            errorTable->item(i,j)->setFlags(errorTable->item(i,j)->flags() ^ Qt::ItemIsEditable);
+//            errorTable->item(i,j)->setBackground(QColor::fromRgb(238,99,99));
+//        }
+//        errorTable->item(i,2)->setFlags(errorTable->item(i,2)->flags() ^ Qt::ItemIsEditable);
+//    }
 }
 
 void MainWindow::setupFileMenu()
@@ -197,7 +206,22 @@ void MainWindow::setupFileMenu()
     fileMenu->addAction(tr("&Open..."), this, SLOT(openFile()), QKeySequence::Open);
     fileMenu->addAction(tr("&Save"), this, SLOT(saveFile()), QKeySequence::Save);
     fileMenu->addAction(tr("E&xit"), qApp, SLOT(quit()), QKeySequence::Quit);
-    fileMenu->addAction(tr("Compile"), this, SLOT(compileFile()), QKeySequence(Qt::CTRL + Qt::Key_R));
+    fileMenu->addAction(tr("&Compile"), this, SLOT(compileFile()), QKeySequence(Qt::CTRL + Qt::Key_R));
+}
+
+void MainWindow::setupSettingMenu(){
+    QMenu *settingMenu = new QMenu(tr("&Setting"), this);
+    menuBar()->addMenu(settingMenu);
+
+    settingMenu->addAction(tr("&set arguments"), this, SLOT(setArgs()), Qt::Key_A);
+}
+
+void MainWindow::setArgs(){
+    bool isOk;
+    QString text = QInputDialog::getText(NULL, "Input Dialog", "Please input your comment", QLineEdit::Normal, arguments, &isOk);
+    if (isOk) {
+        arguments = text;
+    }
 }
 
 void MainWindow::setupHelpMenu()
@@ -207,16 +231,25 @@ void MainWindow::setupHelpMenu()
     helpMenu->addAction(tr("&About"), this, SLOT(about()));
 }
 
-//void MainWindow::handleButton()
-//{
-//    QProcess p;
-//    QString cmd = QString("osascript");
-//    QStringList args;
-//    QString TerminalCmd = "ls";
-//    QString ascript = "tell application \"Terminal\"\n  activate\n  do script \"";
-//    ascript+= TerminalCmd;
-//    ascript+= "\"\n end tell";
-//    args << "-e" << ascript;
-//    p.startDetached(cmd, args);
+void MainWindow::insertToTable(bool *isWarning, int *row, int *col, const std::string &msg) {
 
-//}
+    int rowCount = errorTable->rowCount();
+    errorTable->insertRow(rowCount);
+
+    errorTable->setItem(rowCount, 0, new QTableWidgetItem(row));
+    errorTable->setItem(rowCount, 1, new QTableWidgetItem(col));
+    errorTable->setItem(rowCount, 2, new QTableWidgetItem(QString(msg)));
+
+    if (!isWarning) {
+        for (int i = 0; i < 3; i++) {
+            errorTable->item(rowCount,i)->setFlags(errorTable->item(rowCount,i)->flags() ^ Qt::ItemIsEditable);
+            errorTable->item(rowCount,i)->setBackground(QColor::fromRgb(238,99,99));
+        }
+    } else {
+        for (int i = 0; i < 3; i++) {
+            errorTable->item(rowCount,i)->setFlags(errorTable->item(rowCount,i)->flags() ^ Qt::ItemIsEditable);
+            errorTable->item(rowCount,i)->setBackground(QColor::fromRgb(255,193,37));
+        }
+    }
+}
+

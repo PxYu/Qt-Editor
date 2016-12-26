@@ -26,6 +26,7 @@
 
 #include "QCodeEdit/qcodecpp.h"
 #include "QCodeEdit/qcodeedit.h"
+#include <string>
 
 #include <QMainWindow>
 #include <QPushButton>
@@ -47,12 +48,15 @@ public slots:
     void compileFile();
     void jumpToBug(QTableWidgetItem *);
     void changeState();
+    void setArgs();
 
 private:
     void setupEditor();
     void setupFileMenu();
     void setupHelpMenu();
+    void setupSettingMenu();
     void setupTable();
+    void insertToTable(bool *isWarning, int *row, int *col, const std::string &msg);
 
 Q_SIGNALS:
     void itemDoubleClicked(QTableWidgetItem *item);
@@ -64,6 +68,7 @@ private:
     QTableWidget *errorTable;
     QString currentFileName = "";
     QString mainWindowTitle;
+    QString arguments;
     bool fileIsSaved = false;
 
 };
