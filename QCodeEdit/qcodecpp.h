@@ -54,12 +54,14 @@ private:
     QRegExp commentEndExpression;
 
     QTextCharFormat keywordFormat;
-    QTextCharFormat classFormat;
+    //QTextCharFormat classFormat;
     QTextCharFormat singleLineCommentFormat;
     QTextCharFormat multiLineCommentFormat;
     QTextCharFormat quotationFormat;
     QTextCharFormat functionFormat;
-    QTextCharFormat preprocessorFormat;
+    QTextCharFormat dynamicFunctionFormat;
+    QTextCharFormat infixOperatorFormat;
+    QTextCharFormat numericConstantFormat;
 };
 
 #endif // HIGHLIGHTER_H

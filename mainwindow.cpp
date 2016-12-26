@@ -20,7 +20,6 @@
 * You should have received a copy of the GNU General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
-
 #include <QtWidgets>
 #include <QTableWidget>
 #include <iostream>
@@ -80,6 +79,7 @@ void MainWindow::openFile(const QString &path)
         }
         currentFileName = fileName;
     }
+    fileIsSaved = true;
 }
 
 void MainWindow::saveFile()
@@ -109,13 +109,13 @@ void MainWindow::saveFile()
 
 void MainWindow::compileFile()
 {
-    if (fileIsSaved == false) {
+    if (!fileIsSaved) {
         QMessageBox::warning(NULL, QString("Warning"), QString("Please save before compiling!"), QMessageBox::Ok);
     } else {
         QProcess p;
         QString cmd = QString("osascript");
         QStringList args;
-        QString TerminalCmd = "ls";
+        QString TerminalCmd = "ls /";
         QString ascript = "tell application \"Terminal\"\n";
         ascript += "  activate\n";
         ascript += "  do script \"";

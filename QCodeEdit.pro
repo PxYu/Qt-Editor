@@ -25,3 +25,6 @@ CONFIG += static
 
 RESOURCES += \
     resources.qrc
+
+QMAKE_LFLAGS += -stdlib=libc++
+QMAKE_CXXFLAGS += -stdlib=libc++
