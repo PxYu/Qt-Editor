@@ -69,6 +69,7 @@ void MainWindow::newFile()
     } else {
         editor->clear();
         currentFileName = "";
+        setupTable();
         fileIsSaved = false;
     }
 }
@@ -87,6 +88,7 @@ void MainWindow::openFile(const QString &path)
             editor->setPlainText(file.readAll());
         }
         currentFileName = fileName;
+        setupTable();
     }
     fileIsSaved = true;
 }
@@ -121,6 +123,7 @@ void MainWindow::compileFile()
     if (!fileIsSaved) {
         QMessageBox::warning(NULL, QString("Warning"), QString("Please save before compiling!"), QMessageBox::Ok);
     } else {
+        setupTable();
         QProcess p;
         QString cmd = QString("osascript");
         QStringList args;
@@ -252,4 +255,3 @@ void MainWindow::insertToTable(bool *isWarning, int *row, int *col, const std::s
         }
     }
 }
-
