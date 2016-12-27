@@ -213,7 +213,7 @@ void MainWindow::setupSettingMenu(){
     QMenu *settingMenu = new QMenu(tr("&Setting"), this);
     menuBar()->addMenu(settingMenu);
 
-    settingMenu->addAction(tr("&set arguments"), this, SLOT(setArgs()), Qt::Key_A);
+    settingMenu->addAction(tr("&set arguments"), this, SLOT(setArgs()), QKeySequence(Qt::CTRL + Qt::Key_A));
 }
 
 void MainWindow::setArgs(){
@@ -236,9 +236,9 @@ void MainWindow::insertToTable(bool *isWarning, int *row, int *col, const std::s
     int rowCount = errorTable->rowCount();
     errorTable->insertRow(rowCount);
 
-    errorTable->setItem(rowCount, 0, new QTableWidgetItem(row));
-    errorTable->setItem(rowCount, 1, new QTableWidgetItem(col));
-    errorTable->setItem(rowCount, 2, new QTableWidgetItem(QString(msg)));
+    errorTable->setItem(rowCount, 0, new QTableWidgetItem(QString::number(*row)));
+    errorTable->setItem(rowCount, 1, new QTableWidgetItem(QString::number(*col)));
+    errorTable->setItem(rowCount, 2, new QTableWidgetItem(QString::fromStdString(msg)));
 
     if (!isWarning) {
         for (int i = 0; i < 3; i++) {
