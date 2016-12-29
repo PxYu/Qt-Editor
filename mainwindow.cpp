@@ -25,6 +25,8 @@
 #include <iostream>
 
 #include "mainwindow.h"
+#include "SourceMgr.h"
+#include "CMMParser.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -69,7 +71,7 @@ void MainWindow::newFile()
     } else {
         editor->clear();
         currentFileName = "";
-        setupTable();
+        //setupTable();
         fileIsSaved = false;
     }
 }
@@ -88,7 +90,7 @@ void MainWindow::openFile(const QString &path)
             editor->setPlainText(file.readAll());
         }
         currentFileName = fileName;
-        setupTable();
+        //setupTable();
     }
     fileIsSaved = true;
 }
@@ -118,17 +120,49 @@ void MainWindow::saveFile()
     }
 }
 
+bool MainWindow::FileHasError()
+{
+    using namespace cmm;
+    using namespace std;
+
+    SourceMgr SrcMgr(this->currentFileName.toStdString(), false);
+    //if (SrcMgr.fail()) {
+    //    cerr << "I'm sure SrcMgr is started, and file = " << currentFileName.toStdString() << "\n";
+    //    return true;
+    //}
+
+    CMMParser Parser(SrcMgr);
+
+    int Err = Parser.parse();
+
+    cerr << "I'm sure this is started, and Err = " << Err << endl;
+    for (SourceMgr::ErrorTy &Msg : SrcMgr.getErrorList()) {
+        SourceMgr::LocTy ErrLoc = std::get<0>(Msg);
+        bool isWarning = std::get<1>(Msg) == SourceMgr::ErrorKind::Warning;
+        std::pair<size_t,size_t> RowCol = SrcMgr.getLineColByLoc(ErrLoc);
+        std::string &M = std::get<2>(Msg);
+
+        std::cout << "Taburu: " << "iswarning:" << isWarning << "(" << RowCol.first<<","<<RowCol.second <<")"<< M << std::endl;
+
+        this->insertToTable(isWarning, RowCol.first + 1, RowCol.second + 1, M);
+    }
+    return Err;
+}
+
 void MainWindow::compileFile()
 {
     if (!fileIsSaved) {
         QMessageBox::warning(NULL, QString("Warning"), QString("Please save before compiling!"), QMessageBox::Ok);
     } else {
-        setupTable();
+        //setupTable();
+        errorTable->clearContents();
+        if (FileHasError())
+           return;
         QProcess p;
         QString cmd = QString("osascript");
         QStringList args;
         //QString TerminalCmd = "ls";
-        QString TerminalCmd = "~/Downloads/cmm/cmmbuild/cmm ";
+        QString TerminalCmd = "/Users/wang/Documents/Codes/Cpp/CMM/cmake-build-debug/cmm ";
         TerminalCmd += currentFileName + " " + arguments;
         QString ascript = "tell application \"Terminal\"\n";
         ascript += "  activate\n";
@@ -234,24 +268,17 @@ void MainWindow::setupHelpMenu()
     helpMenu->addAction(tr("&About"), this, SLOT(about()));
 }
 
-void MainWindow::insertToTable(bool *isWarning, int *row, int *col, const std::string &msg) {
+void MainWindow::insertToTable(bool isWarning, int row, int col, const std::string &msg) {
 
     int rowCount = errorTable->rowCount();
     errorTable->insertRow(rowCount);
 
-    errorTable->setItem(rowCount, 0, new QTableWidgetItem(QString::number(*row)));
-    errorTable->setItem(rowCount, 1, new QTableWidgetItem(QString::number(*col)));
+    errorTable->setItem(rowCount, 0, new QTableWidgetItem(QString::number(row)));
+    errorTable->setItem(rowCount, 1, new QTableWidgetItem(QString::number(col)));
     errorTable->setItem(rowCount, 2, new QTableWidgetItem(QString::fromStdString(msg)));
 
-    if (!isWarning) {
-        for (int i = 0; i < 3; i++) {
-            errorTable->item(rowCount,i)->setFlags(errorTable->item(rowCount,i)->flags() ^ Qt::ItemIsEditable);
-            errorTable->item(rowCount,i)->setBackground(QColor::fromRgb(238,99,99));
-        }
-    } else {
-        for (int i = 0; i < 3; i++) {
-            errorTable->item(rowCount,i)->setFlags(errorTable->item(rowCount,i)->flags() ^ Qt::ItemIsEditable);
-            errorTable->item(rowCount,i)->setBackground(QColor::fromRgb(255,193,37));
-        }
+    for (int i = 0; i < 3; i++) {
+        errorTable->item(rowCount,i)->setFlags(errorTable->item(rowCount,i)->flags() ^ Qt::ItemIsEditable);
+        errorTable->item(rowCount,i)->setBackground(isWarning ? QColor::fromRgb(255,193,37) : QColor::fromRgb(238,99,99));
     }
 }

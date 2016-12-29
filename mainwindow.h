@@ -46,6 +46,7 @@ public slots:
     void openFile(const QString &path = QString());
     void saveFile();
     void compileFile();
+    bool FileHasError();
     void jumpToBug(QTableWidgetItem *);
     void changeState();
     void setArgs();
@@ -56,7 +57,7 @@ private:
     void setupHelpMenu();
     void setupSettingMenu();
     void setupTable();
-    void insertToTable(bool *isWarning, int *row, int *col, const std::string &msg);
+    void insertToTable(bool isWarning, int row, int col, const std::string &msg);
 
 Q_SIGNALS:
     void itemDoubleClicked(QTableWidgetItem *item);
